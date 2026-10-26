@@ -37,17 +37,17 @@ import java.util.Map;
  * 3. Schema inspection and table metadata analysis via {@link DatabaseMetaData}
  * 4. Raw table data exports
  */
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor
 public class JdbcDatabasePersistenceService {
 
     private static final Logger log = LoggerFactory.getLogger(JdbcDatabasePersistenceService.class);
     private static final String BACKUP_DIR = "./backups";
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    @Autowired
-    private DataSource dataSource;
+    private final JdbcTemplate jdbcTemplate;
+    private final DataSource dataSource;
 
     @Data
     @Builder

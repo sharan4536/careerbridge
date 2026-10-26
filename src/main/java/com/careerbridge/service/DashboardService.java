@@ -14,22 +14,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor
 public class DashboardService {
 
-    @Autowired
-    private ApplicationRepository applicationRepository;
-    
-    @Autowired
-    private UserRepository userRepository;
-    
-    @Autowired
-    private StudentRepository studentRepository;
-
-    private Student getStudentByEmail(String email) {
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
-        return studentRepository.findByUserId(user.getId()).orElseThrow(() -> new RuntimeException("Student not found"));
-    }
+    private final ApplicationRepository applicationRepository;
+    private final UserRepository userRepository;
+    private final StudentRepository studentRepository;
 
     public DashboardResponse getDashboardStats(String email) {
         User user = userRepository.findByEmail(email).orElse(null);

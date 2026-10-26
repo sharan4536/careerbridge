@@ -46,6 +46,7 @@ public class AdminDashboard extends Application {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void start(Stage primaryStage) {
         primaryStage.setTitle("CareerBridge Admin Dashboard - JDBC Persistence Manager");
 

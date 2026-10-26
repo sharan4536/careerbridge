@@ -8,12 +8,14 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import lombok.RequiredArgsConstructor;
+
 @RestController
 @RequestMapping("/api/auto-apply")
+@RequiredArgsConstructor
 public class AutoApplyController {
 
-    @Autowired
-    private AutoApplyService autoApplyService;
+    private final AutoApplyService autoApplyService;
 
     @PostMapping("/run")
     public ResponseEntity<List<String>> runAutoApply(Authentication authentication, @RequestParam Long defaultResumeVersionId) {

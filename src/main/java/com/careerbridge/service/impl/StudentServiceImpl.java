@@ -10,14 +10,14 @@ import com.careerbridge.service.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor
 public class StudentServiceImpl implements StudentService {
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private StudentRepository studentRepository;
+    private final UserRepository userRepository;
+    private final StudentRepository studentRepository;
 
     @Override
     public StudentProfileDto getProfile(String email) {

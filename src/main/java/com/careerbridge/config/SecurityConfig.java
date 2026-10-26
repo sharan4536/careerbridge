@@ -3,7 +3,8 @@ package com.careerbridge.config;
 import com.careerbridge.security.CustomUserDetailsService;
 import com.careerbridge.security.JwtAuthenticationEntryPoint;
 import com.careerbridge.security.JwtAuthenticationFilter;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.careerbridge.security.JwtTokenProvider;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -22,33 +23,19 @@ import org.springframework.web.cors.CorsConfiguration;
 
 import java.util.List;
 
-/**
- * Spring Security Configuration for CareerBridge.
- * 
- * Configures:
- * 1. Stateless session management (SessionCreationPolicy.STATELESS) for REST APIs.
- * 2. Cross-Origin Resource Sharing (CORS) permitting React frontend requests.
- * 3. CSRF disabled since authentication uses stateless JSON Web Tokens (JWT).
- * 4. Role-based authorization rules and public endpoint permissions.
- * 5. Custom JwtAuthenticationFilter integration before UsernamePasswordAuthenticationFilter.
- */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
-    @Autowired
-    private CustomUserDetailsService customUserDetailsService;
+    private final CustomUserDetailsService customUserDetailsService;
+    private final JwtAuthenticationEntryPoint unauthorizedHandler;
+    private final JwtTokenProvider tokenProvider;
 
-    @Autowired
-    private JwtAuthenticationEntryPoint unauthorizedHandler;
-
-    /**
-     * Bean definition for custom JWT authentication filter that extracts and validates tokens.
-     */
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() {
-        return new JwtAuthenticationFilter();
+        return new JwtAuthenticationFilter(tokenProvider, customUserDetailsService);
     }
 
     /**
@@ -103,12 +90,14 @@ public class SecurityConfig {
                     "/recruiter",
                     "/assets/**",
                     "/favicon.ico",
-                    "/error"
+                    "/error",
+                    "/h2-console/**"
                 ).permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .anyRequest().authenticated()
-            );
+            )
+            .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()));
 
         // Register custom JWT filter in the Spring Security filter chain
         http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);

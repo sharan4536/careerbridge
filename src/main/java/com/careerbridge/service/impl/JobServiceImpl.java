@@ -16,38 +16,26 @@ import com.careerbridge.service.JobService;
 import com.careerbridge.service.engine.EligibilityEngine;
 import com.careerbridge.service.engine.JobFitEngine;
 import com.careerbridge.service.engine.SkillGapAnalyzer;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class JobServiceImpl implements JobService {
 
-    @Autowired
-    private JobRepository jobRepository;
-    
-    @Autowired
-    private JobRequirementRepository jobRequirementRepository;
-    
-    @Autowired
-    private UserRepository userRepository;
-    
-    @Autowired
-    private StudentRepository studentRepository;
-    
-    @Autowired
-    private StudentSkillRepository studentSkillRepository;
-    
-    @Autowired
-    private EligibilityEngine eligibilityEngine;
-    
-    @Autowired
-    private JobFitEngine jobFitEngine;
-    
-    @Autowired
-    private SkillGapAnalyzer skillGapAnalyzer;
+    private final JobRepository jobRepository;
+    private final JobRequirementRepository jobRequirementRepository;
+    private final UserRepository userRepository;
+    private final StudentRepository studentRepository;
+    private final StudentSkillRepository studentSkillRepository;
+    private final CompanyRepository companyRepository;
+    private final EligibilityEngine eligibilityEngine;
+    private final JobFitEngine jobFitEngine;
+    private final SkillGapAnalyzer skillGapAnalyzer;
 
     private Student getStudentByEmail(String email) {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
@@ -56,10 +44,8 @@ public class JobServiceImpl implements JobService {
         );
     }
 
-    @Autowired
-    private CompanyRepository companyRepository;
-
     @Override
+    @Transactional(readOnly = true)
     public List<JobResponse> getAllJobs() {
         return jobRepository.findAll().stream().map(job -> {
             JobResponse resp = new JobResponse();
@@ -74,6 +60,7 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
+    @Transactional
     public JobResponse createJob(String email, com.careerbridge.dto.request.JobRequest request) {
         // Mocking company for MVP based on recruiter email domain or just a default
         com.careerbridge.entity.Company company = companyRepository.findByName("Tech Corp");

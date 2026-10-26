@@ -14,17 +14,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor
 public class AdminService {
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private JobRepository jobRepository;
-
-    @Autowired
-    private ApplicationRepository applicationRepository;
+    private final UserRepository userRepository;
+    private final JobRepository jobRepository;
+    private final ApplicationRepository applicationRepository;
 
     public AdminDashboardResponse getAdminDashboardStats() {
         AdminDashboardResponse resp = new AdminDashboardResponse();

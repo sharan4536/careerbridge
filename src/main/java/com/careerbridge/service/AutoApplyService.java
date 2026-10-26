@@ -19,17 +19,15 @@ import java.util.List;
  * 3. Automatically submits applications for eligible roles with a specified resume version
  * 4. Generates an execution report summarizing successful applications and skipped postings
  */
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor
 public class AutoApplyService {
 
-    @Autowired
-    private JobRepository jobRepository;
-    
-    @Autowired
-    private JobService jobService;
-    
-    @Autowired
-    private ApplicationService applicationService;
+    private final JobRepository jobRepository;
+    private final JobService jobService;
+    private final ApplicationService applicationService;
 
     public List<String> runAutoApply(String email, Long defaultResumeVersionId) {
         List<String> results = new ArrayList<>();

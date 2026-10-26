@@ -16,29 +16,19 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor
 public class ApplicationServiceImpl implements ApplicationService {
 
-    @Autowired
-    private ApplicationRepository applicationRepository;
-
-    @Autowired
-    private ApplicationEventRepository applicationEventRepository;
-
-    @Autowired
-    private JobRepository jobRepository;
-
-    @Autowired
-    private ResumeVersionRepository resumeVersionRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private StudentRepository studentRepository;
-
-    @Autowired
-    private JobService jobService;
+    private final ApplicationRepository applicationRepository;
+    private final ApplicationEventRepository applicationEventRepository;
+    private final JobRepository jobRepository;
+    private final ResumeVersionRepository resumeVersionRepository;
+    private final UserRepository userRepository;
+    private final StudentRepository studentRepository;
+    private final JobService jobService;
 
     private Student getStudentByEmail(String email) {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
@@ -147,9 +137,17 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ApplicationEventResponse> getApplicationTimeline(String email, Long id) {
-        Application app = applicationRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Application not found"));
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+        Application app;
+        if (user.getRole() == Role.RECRUITER || user.getRole() == Role.ADMIN) {
+            app = applicationRepository.findById(id).orElseThrow(() -> new RuntimeException("Application not found"));
+        } else {
+            Student student = studentRepository.findByUserId(user.getId()).orElseThrow(() -> new RuntimeException("Student not found"));
+            app = applicationRepository.findByIdAndStudentId(id, student.getId())
+                    .orElseThrow(() -> new RuntimeException("Application not found"));
+        }
 
         return applicationEventRepository.findByApplicationIdOrderByTimestampDesc(app.getId()).stream()
                 .map(event -> {

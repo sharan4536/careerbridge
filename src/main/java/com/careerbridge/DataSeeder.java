@@ -43,41 +43,23 @@ import java.util.List;
  * 4. Job eligibility criteria and skill requirements
  * 5. Initial student resumes, version history, and submitted applications with immutable snapshots
  */
+import lombok.RequiredArgsConstructor;
+
 @Component
+@RequiredArgsConstructor
 public class DataSeeder implements CommandLineRunner {
 
-    @Autowired
-    private CompanyRepository companyRepository;
-
-    @Autowired
-    private JobRepository jobRepository;
-
-    @Autowired
-    private JobRequirementRepository jobRequirementRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private StudentRepository studentRepository;
-
-    @Autowired
-    private SkillRepository skillRepository;
-
-    @Autowired
-    private StudentSkillRepository studentSkillRepository;
-
-    @Autowired
-    private ResumeRepository resumeRepository;
-
-    @Autowired
-    private ResumeVersionRepository resumeVersionRepository;
-
-    @Autowired
-    private ApplicationRepository applicationRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final CompanyRepository companyRepository;
+    private final JobRepository jobRepository;
+    private final JobRequirementRepository jobRequirementRepository;
+    private final UserRepository userRepository;
+    private final StudentRepository studentRepository;
+    private final SkillRepository skillRepository;
+    private final StudentSkillRepository studentSkillRepository;
+    private final ResumeRepository resumeRepository;
+    private final ResumeVersionRepository resumeVersionRepository;
+    private final ApplicationRepository applicationRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public void run(String... args) throws Exception {

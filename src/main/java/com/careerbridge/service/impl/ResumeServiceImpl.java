@@ -17,26 +17,21 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.careerbridge.entity.Role;
+import lombok.RequiredArgsConstructor;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ResumeServiceImpl implements ResumeService {
 
-    @Autowired
-    private ResumeRepository resumeRepository;
-    
-    @Autowired
-    private ResumeVersionRepository versionRepository;
-    
-    @Autowired
-    private UserRepository userRepository;
-    
-    @Autowired
-    private StudentRepository studentRepository;
-    
-    @Autowired
-    private FileStorageService fileStorageService;
+    private final ResumeRepository resumeRepository;
+    private final ResumeVersionRepository versionRepository;
+    private final UserRepository userRepository;
+    private final StudentRepository studentRepository;
+    private final FileStorageService fileStorageService;
 
     private Student getStudentByEmail(String email) {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
@@ -108,15 +103,22 @@ public class ResumeServiceImpl implements ResumeService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public byte[] downloadResumeVersionFile(String email, Long versionId) {
-        Student student = getStudentByEmail(email);
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
         ResumeVersion version = versionRepository.findById(versionId)
                 .orElseThrow(() -> new RuntimeException("Version not found"));
-                
+
+        if (user.getRole() == Role.RECRUITER || user.getRole() == Role.ADMIN) {
+            return fileStorageService.loadFile(version.getFileReference());
+        }
+
+        Student student = studentRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new RuntimeException("Student profile not found"));
         if (!version.getResume().getStudent().getId().equals(student.getId())) {
             throw new RuntimeException("Unauthorized to access this resume");
         }
-        
+
         return fileStorageService.loadFile(version.getFileReference());
     }
 

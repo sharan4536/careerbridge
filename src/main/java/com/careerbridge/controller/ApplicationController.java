@@ -12,12 +12,14 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import lombok.RequiredArgsConstructor;
+
 @RestController
 @RequestMapping("/api/applications")
+@RequiredArgsConstructor
 public class ApplicationController {
 
-    @Autowired
-    private ApplicationService applicationService;
+    private final ApplicationService applicationService;
 
     @PostMapping
     public ResponseEntity<ApplicationResponse> submitApplication(Authentication authentication, @RequestBody ApplicationRequest request) {

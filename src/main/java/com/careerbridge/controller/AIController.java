@@ -8,12 +8,14 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
+import lombok.RequiredArgsConstructor;
+
 @RestController
 @RequestMapping("/api/ai")
+@RequiredArgsConstructor
 public class AIController {
 
-    @Autowired
-    private AIService aiService;
+    private final AIService aiService;
 
     @GetMapping("/resume/{versionId}/analyze")
     public ResponseEntity<Map<String, Object>> analyzeResume(Authentication authentication, @PathVariable Long versionId) {
