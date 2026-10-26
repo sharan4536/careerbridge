@@ -1,0 +1,302 @@
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Space+Grotesk:wght@400;600;700&display=swap');
+
+:root {
+  --bg-paper: #f4f1ea;
+  --ink-black: #2b2b2b;
+  --ink-blue: #2563eb;
+  --highlighter-yellow: #fde047;
+  --highlighter-pink: #f9a8d4;
+  --highlighter-green: #86efac;
+  
+  --sketch-border: 255px 15px 225px 15px/15px 225px 15px 255px;
+  --sketch-border-2: 15px 225px 15px 255px/255px 15px 225px 15px;
+}
+
+body {
+  margin: 0;
+  font-family: 'Space Grotesk', sans-serif;
+  background-color: var(--bg-paper);
+  /* Career elements doodle background: briefcase, chart, document */
+  background-image: 
+    url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23d1cbb8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 20h20v15H20zM25 15h10v5H25z'/%3E%3Cpath d='M80 80l15-15 10 10M80 80v20M95 65v35M105 75v25'/%3E%3Cpath d='M20 80h15v20H20zM25 85h5M25 90h5M25 95h5'/%3E%3Ccircle cx='90' cy='25' r='10'/%3E%3Cpath d='M90 35v10M80 25h-10'/%3E%3C/g%3E%3C/svg%3E"),
+    linear-gradient(rgba(209, 203, 184, 0.4) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(209, 203, 184, 0.4) 1px, transparent 1px);
+  background-size: 200px 200px, 20px 20px, 20px 20px;
+  color: var(--ink-black);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Animations */
+@keyframes float {
+  0% { transform: translateY(0px) rotate(-1deg); }
+  50% { transform: translateY(-5px) rotate(1deg); }
+  100% { transform: translateY(0px) rotate(-1deg); }
+}
+
+@keyframes scribble {
+  0% { border-radius: 255px 15px 225px 15px/15px 225px 15px 255px; }
+  50% { border-radius: 15px 225px 15px 255px/255px 15px 225px 15px; }
+  100% { border-radius: 255px 15px 225px 15px/15px 225px 15px 255px; }
+}
+
+/* 3D Hand-drawn Panel / Card */
+.glass-panel {
+  background: white;
+  border-radius: var(--sketch-border);
+  padding: 32px;
+  border: 3px solid var(--ink-black);
+  box-shadow: 6px 6px 0px var(--ink-black);
+  transition: all 0.2s ease;
+  animation: float 6s ease-in-out infinite, scribble 8s infinite alternate;
+  position: relative;
+}
+
+.glass-panel::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: 20px;
+  width: 40px;
+  height: 15px;
+  background: rgba(255,0,0,0.4); /* Tape effect */
+  transform: rotate(-5deg);
+  opacity: 0.3;
+}
+
+.glass-panel:nth-child(even)::before {
+  left: auto;
+  right: 20px;
+  background: rgba(0,0,255,0.4);
+  transform: rotate(5deg);
+}
+
+.glass-panel:hover {
+  transform: translateY(-4px) translateX(-2px);
+  box-shadow: 10px 10px 0px var(--ink-black);
+}
+
+/* Base Styles */
+h1, h2, h3, h4, h5, h6 {
+  margin-top: 0;
+  font-family: 'Caveat', cursive;
+  font-size: 2.5em;
+  color: var(--ink-black);
+  transform: rotate(-1deg);
+  display: inline-block;
+  position: relative;
+}
+
+h3 {
+  font-size: 1.8em;
+}
+
+/* Underline marker effect for headings */
+h2::after {
+  content: '';
+  position: absolute;
+  bottom: 0px;
+  left: 0;
+  width: 100%;
+  height: 8px;
+  background: var(--highlighter-yellow);
+  z-index: -1;
+  transform: rotate(-2deg);
+  border-radius: 10px;
+}
+
+a {
+  color: var(--ink-blue);
+  text-decoration: underline;
+  text-decoration-style: wavy;
+  text-decoration-thickness: 2px;
+  font-weight: 700;
+  transition: all 0.2s ease;
+}
+
+a:hover {
+  color: var(--ink-black);
+  background-color: var(--highlighter-yellow);
+}
+
+/* Hand-drawn 3D Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  border-radius: var(--sketch-border);
+  font-family: 'Caveat', cursive;
+  font-size: 1.6rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.1s ease;
+  border: 3px solid var(--ink-black);
+  text-transform: capitalize;
+  box-shadow: 4px 4px 0px var(--ink-black);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary {
+  background: var(--highlighter-pink);
+  color: var(--ink-black);
+}
+
+.btn-primary:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px var(--ink-black);
+}
+
+.btn-primary:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px var(--ink-black);
+}
+
+.btn-outline {
+  background: white;
+  color: var(--ink-black);
+}
+
+.btn-outline:hover {
+  background: var(--highlighter-yellow);
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px var(--ink-black);
+}
+
+.btn-outline:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px var(--ink-black);
+}
+
+/* Inputs */
+.form-group {
+  margin-bottom: 24px;
+  position: relative;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 10px;
+  font-family: 'Caveat', cursive;
+  font-size: 1.6rem;
+  color: var(--ink-black);
+}
+
+.form-input {
+  width: 100%;
+  padding: 14px 20px;
+  border-radius: var(--sketch-border-2);
+  border: 3px solid var(--ink-black);
+  background: white;
+  color: var(--ink-black);
+  font-size: 1.1rem;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+  box-shadow: inset 2px 2px 0px rgba(0,0,0,0.05);
+}
+
+.form-input:focus {
+  outline: none;
+  background: #fffdf2;
+  border-radius: var(--sketch-border);
+  box-shadow: inset 4px 4px 0px rgba(0,0,0,0.1), 0 0 0 4px var(--highlighter-yellow);
+}
+
+/* Layout */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.justify-center { justify-content: center; }
+.gap-4 { gap: 16px; }
+.gap-2 { gap: 8px; }
+.w-full { width: 100%; }
+.mt-4 { margin-top: 16px; }
+
+/* Navigation - Post-it Note Style */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 40px;
+  background: var(--highlighter-yellow);
+  border-bottom: 4px solid var(--ink-black);
+  box-shadow: 0 4px 0px var(--ink-black);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  transform: rotate(-0.5deg);
+  margin-top: 10px;
+}
+
+.navbar-brand {
+  font-family: 'Caveat', cursive;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--ink-black);
+  text-decoration: none;
+}
+
+.nav-links {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.nav-link {
+  font-family: 'Caveat', cursive;
+  color: var(--ink-black);
+  font-size: 1.6rem;
+  font-weight: 700;
+  padding: 5px 15px;
+  text-decoration: none;
+  border: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.nav-link.active {
+  border: 2px solid var(--ink-black);
+  border-radius: 50%;
+  transform: rotate(-5deg);
+}
+
+.nav-link:hover:not(.active) {
+  border-bottom: 4px wavy var(--ink-blue);
+  background: transparent;
+}
+
+/* Badges - Hand-drawn Tags */
+.badge {
+  padding: 6px 14px;
+  border-radius: var(--sketch-border);
+  border: 2px solid var(--ink-black);
+  font-family: 'Caveat', cursive;
+  font-size: 1.2rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  box-shadow: 2px 2px 0px var(--ink-black);
+  display: inline-block;
+}
+.badge-success { background: var(--highlighter-green); color: var(--ink-black); }
+.badge-warning { background: var(--highlighter-yellow); color: var(--ink-black); }
+.badge-danger { background: var(--highlighter-pink); color: var(--ink-black); }
+.badge-info { background: #93c5fd; color: var(--ink-black); }
+
+/* Decorative 3D Floating Elements */
+.floating-element {
+  animation: float 2.5s ease-in-out infinite alternate;
+}
+
+svg {
+  stroke-width: 2.5px;
+  stroke: var(--ink-black);
+}
