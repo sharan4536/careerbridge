@@ -10,5 +10,13 @@ public class JobResponse {
     private String role;
     private String location;
     private String salaryRange;
+    private String description;
     private LocalDateTime postedDate;
+    private String requiredSkills;
+    private String preferredSkills;
+    private Double minCgpa;
+    private Integer maxBacklogs;
+    private Integer graduationYear;
+    private String eligibleBranches;
 }
+

@@ -3,7 +3,6 @@ package com.careerbridge.controller;
 import com.careerbridge.dto.response.AdminDashboardResponse;
 import com.careerbridge.service.AdminService;
 import com.careerbridge.service.JdbcDatabasePersistenceService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -13,16 +12,18 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
-import lombok.RequiredArgsConstructor;
-
 @RestController
 @RequestMapping("/api/admin")
 @PreAuthorize("hasRole('ADMIN')")
-@RequiredArgsConstructor
 public class AdminController {
 
     private final AdminService adminService;
     private final JdbcDatabasePersistenceService jdbcDatabasePersistenceService;
+
+    public AdminController(AdminService adminService, JdbcDatabasePersistenceService jdbcDatabasePersistenceService) {
+        this.adminService = adminService;
+        this.jdbcDatabasePersistenceService = jdbcDatabasePersistenceService;
+    }
 
     @GetMapping("/dashboard")
     public ResponseEntity<AdminDashboardResponse> getDashboard() {

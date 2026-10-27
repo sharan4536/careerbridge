@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api';
 import { Briefcase, UserCheck, Shield, Award } from 'lucide-react';
 
 export default function Login() {
@@ -14,7 +14,7 @@ export default function Login() {
     setError('');
     setLoading(true);
     try {
-      const res = await axios.post('http://localhost:8080/api/auth/login', {
+      const res = await api.post('/auth/login', {
         email: loginEmail,
         password: loginPassword,
       });
@@ -91,7 +91,7 @@ export default function Login() {
               onClick={() => handleQuickLogin('student@careerbridge.com', 'password123')}
               className="btn btn-outline flex items-center justify-between"
               style={{ padding: '8px 12px', fontSize: '0.9rem', width: '100%' }}>
-              <span className="flex items-center gap-2"><Award size={18} color="#2563eb" /> Student (Alex Chen)</span>
+              <span className="flex items-center gap-2"><Award size={18} color="#2563eb" /> Student Persona</span>
               <span className="badge badge-info" style={{ fontSize: '0.75rem' }}>Demo</span>
             </button>
             <button 

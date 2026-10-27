@@ -4,7 +4,6 @@ import com.careerbridge.dto.request.ApplicationRequest;
 import com.careerbridge.dto.response.ApplicationEventResponse;
 import com.careerbridge.dto.response.ApplicationResponse;
 import com.careerbridge.service.ApplicationService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -12,14 +11,15 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import lombok.RequiredArgsConstructor;
-
 @RestController
 @RequestMapping("/api/applications")
-@RequiredArgsConstructor
 public class ApplicationController {
 
     private final ApplicationService applicationService;
+
+    public ApplicationController(ApplicationService applicationService) {
+        this.applicationService = applicationService;
+    }
 
     @PostMapping
     public ResponseEntity<ApplicationResponse> submitApplication(Authentication authentication, @RequestBody ApplicationRequest request) {

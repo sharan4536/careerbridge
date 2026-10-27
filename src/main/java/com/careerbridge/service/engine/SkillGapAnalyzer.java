@@ -10,13 +10,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Skill Gap Analysis Engine.
- * 
- * Compares skills required by an employer with skills registered in a student's profile.
- * Identifies:
- * 1. Matched skills already possessed by the candidate
- * 2. Missing prerequisite technical skills
- * 3. Personalized learning recommendations to bridge identified gaps
+ * Analyzes candidate skill sets against job posting requirements to identify matched and missing competencies.
  */
 @Service
 public class SkillGapAnalyzer {
@@ -28,9 +22,6 @@ public class SkillGapAnalyzer {
         public List<String> recommendations = new ArrayList<>();
     }
 
-    /**
-     * Performs skill intersection and difference analysis between student profile and job posting.
-     */
     public SkillGapResult analyze(List<StudentSkill> studentSkills, JobRequirement req) {
         SkillGapResult result = new SkillGapResult();
         if (req == null || req.getRequiredSkills() == null) return result;

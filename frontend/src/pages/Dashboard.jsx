@@ -13,8 +13,8 @@ export default function Dashboard() {
     degree: '',
     branch: '',
     college: '',
-    graduationYear: 2026,
-    cgpa: 8.5,
+    graduationYear: '',
+    cgpa: '',
     backlogs: 0,
     preferredRoles: '',
     preferredLocations: '',
@@ -43,8 +43,8 @@ export default function Dashboard() {
           degree: res.data.degree || '',
           branch: res.data.branch || '',
           college: res.data.college || '',
-          graduationYear: res.data.graduationYear || 2026,
-          cgpa: res.data.cgpa || 0,
+          graduationYear: res.data.graduationYear || '',
+          cgpa: res.data.cgpa || '',
           backlogs: res.data.backlogs || 0,
           preferredRoles: res.data.preferredRoles || '',
           preferredLocations: res.data.preferredLocations || '',
@@ -77,7 +77,7 @@ export default function Dashboard() {
         <div>
           <h2>Student Dashboard</h2>
           <p style={{ color: 'var(--text-secondary)', marginTop: '4px' }}>
-            Welcome back, <strong>{profile?.name || 'Scholar'}</strong>! Here is your placement summary.
+            Welcome back, <strong>{profile?.name || (profile?.email ? profile.email.split('@')[0] : 'Student')}</strong>! Here is your placement summary.
           </p>
         </div>
         <div className="flex gap-2">
@@ -138,7 +138,7 @@ export default function Dashboard() {
             </div>
             <div>
               <span style={{ color: 'var(--text-secondary)', display: 'block', fontSize: '0.85rem' }}>Graduation Year</span>
-              <strong>{profile?.graduationYear || '2026'}</strong>
+              <strong>{profile?.graduationYear || 'Not set'}</strong>
             </div>
             <div>
               <span style={{ color: 'var(--text-secondary)', display: 'block', fontSize: '0.85rem' }}>Active Backlogs</span>
@@ -146,11 +146,11 @@ export default function Dashboard() {
             </div>
             <div>
               <span style={{ color: 'var(--text-secondary)', display: 'block', fontSize: '0.85rem' }}>Target Roles</span>
-              <strong>{profile?.preferredRoles || 'Full-Stack Developer'}</strong>
+              <strong>{profile?.preferredRoles || 'Not set'}</strong>
             </div>
             <div>
               <span style={{ color: 'var(--text-secondary)', display: 'block', fontSize: '0.85rem' }}>Expected CTC (INR)</span>
-              <strong style={{ color: '#16a34a' }}>{profile?.salaryExpectations ? profile.salaryExpectations.replace(/\$/g, '₹').replace(/k/g, ' LPA') : '₹18 LPA - ₹24 LPA'}</strong>
+              <strong style={{ color: '#16a34a' }}>{profile?.salaryExpectations || 'Not set'}</strong>
             </div>
           </div>
         </div>
@@ -164,7 +164,7 @@ export default function Dashboard() {
             <Star size={56} color="#fcd34d" className="floating-element" />
             <div>
               <h2 style={{ margin: 0, fontSize: '2.5rem', color: 'var(--ink-black)' }}>
-                {stats.averageJobFit?.Overall ? stats.averageJobFit.Overall.toFixed(1) : '85.0'}%
+                {stats.averageJobFit?.Overall ? `${stats.averageJobFit.Overall.toFixed(1)}%` : (stats.totalApplications > 0 ? '0%' : 'N/A')}
               </h2>
               <span style={{ color: 'var(--text-secondary)', fontWeight: 'bold' }}>Overall match across applications</span>
             </div>

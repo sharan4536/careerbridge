@@ -10,16 +10,14 @@ CareerBridge is an enterprise-grade full-stack campus recruitment platform engin
 
 ---
 
-## 📖 Project Review & Defense Documentation
-For your viva, code presentation, and project review questions, refer to the complete guide:
-👉 **[PROJECT_REVIEW_MANUAL.md](./PROJECT_REVIEW_MANUAL.md)**
-
-It includes:
-- Architecture diagrams & package structures
-- Line-by-line Java code explanations
-- Reviewer speaking scripts ("What to say when presenting each file")
-- Top 20 viva interview questions & model answers
-- Live demonstration flow
+## 🌟 Key Features
+- **Deterministic Eligibility Engine**: Real-time evaluation of student eligibility against CGPA, allowable backlogs, and graduation year criteria.
+- **Job Fit Matching Algorithm**: Weighted compatibility scoring analyzing skill overlaps, coursework, and credentials.
+- **Skill Gap Diagnostics**: Intelligent breakdown of missing competencies with actionable learning recommendations.
+- **Resume Versioning & Immutable Snapshots**: Cryptographic file hashing preserving application state at the instant of submission.
+- **Asynchronous Auto-Application Processing**: Non-blocking worker threads managing concurrent candidate applications.
+- **Role-Based Access Control**: Secure JWT stateless authentication separating Student, Recruiter, and Admin portals.
+- **Dual Database Access Layer**: High-productivity Spring Data JPA paired with direct JDBC persistence and checkpoint management.
 
 ---
 
@@ -86,6 +84,5 @@ careerbridge/
 ├── backups/                # JDBC SQL database backup dumps
 ├── uploads/                # Secure candidate resume PDF storage
 ├── pom.xml                 # Maven build dependencies & plugins
-├── PROJECT_REVIEW_MANUAL.md# Comprehensive project review & viva manual
 └── README.md               # Project documentation
 ```

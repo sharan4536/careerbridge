@@ -6,6 +6,9 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
+/**
+ * User account entity representing credentials and system authorization role.
+ */
 @Entity
 @Table(name = "users")
 @Data

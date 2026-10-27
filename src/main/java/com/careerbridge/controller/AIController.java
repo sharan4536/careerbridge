@@ -1,29 +1,29 @@
 package com.careerbridge.controller;
 
 import com.careerbridge.service.AIService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
-import lombok.RequiredArgsConstructor;
-
 @RestController
 @RequestMapping("/api/ai")
-@RequiredArgsConstructor
 public class AIController {
 
     private final AIService aiService;
 
+    public AIController(AIService aiService) {
+        this.aiService = aiService;
+    }
+
     @GetMapping("/resume/{versionId}/analyze")
-    public ResponseEntity<Map<String, Object>> analyzeResume(Authentication authentication, @PathVariable Long versionId) {
+    public ResponseEntity<Map<String, Object>> analyzeResume(@PathVariable Long versionId) {
         return ResponseEntity.ok(aiService.analyzeResume(versionId));
     }
 
     @GetMapping("/job/{jobId}/interview-prep")
-    public ResponseEntity<Map<String, Object>> generateInterviewQuestions(Authentication authentication, @PathVariable Long jobId) {
+    public ResponseEntity<Map<String, Object>> generateInterviewQuestions(@PathVariable Long jobId) {
         return ResponseEntity.ok(aiService.generateInterviewQuestions(jobId));
     }
 

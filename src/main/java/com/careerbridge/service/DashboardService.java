@@ -7,22 +7,28 @@ import com.careerbridge.entity.User;
 import com.careerbridge.repository.ApplicationRepository;
 import com.careerbridge.repository.StudentRepository;
 import com.careerbridge.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import lombok.RequiredArgsConstructor;
-
 @Service
-@RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class DashboardService {
 
     private final ApplicationRepository applicationRepository;
     private final UserRepository userRepository;
     private final StudentRepository studentRepository;
+
+    public DashboardService(ApplicationRepository applicationRepository,
+                            UserRepository userRepository,
+                            StudentRepository studentRepository) {
+        this.applicationRepository = applicationRepository;
+        this.userRepository = userRepository;
+        this.studentRepository = studentRepository;
+    }
 
     public DashboardResponse getDashboardStats(String email) {
         User user = userRepository.findByEmail(email).orElse(null);

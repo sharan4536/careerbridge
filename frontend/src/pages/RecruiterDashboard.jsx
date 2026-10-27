@@ -5,20 +5,19 @@ import { Navigate } from 'react-router-dom';
 
 const formatSalaryInr = (salary) => {
   if (!salary) return '';
-  return salary
-    .replace(/\$150k\s*-\s*\$200k/gi, '₹24 LPA - ₹32 LPA')
-    .replace(/\$120k\s*-\s*\$160k/gi, '₹16 LPA - ₹22 LPA')
-    .replace(/\$130k\s*-\s*\$180k/gi, '₹20 LPA - ₹28 LPA')
-    .replace(/\$110,000\s*-\s*\$130,000/gi, '₹14 LPA - ₹18 LPA')
-    .replace(/\$/g, '₹');
+  return salary;
 };
 
 export default function RecruiterDashboard() {
   const [jobs, setJobs] = useState([]);
   const [formData, setFormData] = useState({
     role: '',
+    companyName: '',
     location: '',
     salaryRange: '',
+    requiredSkills: '',
+    minCgpa: '',
+    graduationYear: '',
     description: ''
   });
   const [showForm, setShowForm] = useState(false);
@@ -55,7 +54,16 @@ export default function RecruiterDashboard() {
     setSubmitting(true);
     try {
       await api.post('/jobs', formData);
-      setFormData({role: '', location: '', salaryRange: '', description: ''});
+      setFormData({
+        role: '',
+        companyName: '',
+        location: '',
+        salaryRange: '',
+        requiredSkills: '',
+        minCgpa: '',
+        graduationYear: '',
+        description: ''
+      });
       setShowForm(false);
       setStatusMessage('Job listing published successfully!');
       setTimeout(() => setStatusMessage(''), 4000);
@@ -66,6 +74,7 @@ export default function RecruiterDashboard() {
       setSubmitting(false);
     }
   };
+
 
   const openApplicantsModal = async (job) => {
     setSelectedJob(job);
@@ -184,17 +193,31 @@ export default function RecruiterDashboard() {
             </button>
           </div>
           <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label>Role / Position Title</label>
-              <input 
-                type="text" 
-                name="role" 
-                value={formData.role} 
-                onChange={handleChange} 
-                className="form-input" 
-                placeholder="e.g. Senior Backend Engineer (Distributed Systems)"
-                required 
-              />
+            <div className="flex gap-4" style={{ flexWrap: 'wrap' }}>
+              <div className="form-group" style={{ flex: 1, minWidth: '240px' }}>
+                <label>Role / Position Title</label>
+                <input 
+                  type="text" 
+                  name="role" 
+                  value={formData.role} 
+                  onChange={handleChange} 
+                  className="form-input" 
+                  placeholder="e.g. Senior Backend Engineer"
+                  required 
+                />
+              </div>
+              <div className="form-group" style={{ flex: 1, minWidth: '240px' }}>
+                <label>Company / Organization Name</label>
+                <input 
+                  type="text" 
+                  name="companyName" 
+                  value={formData.companyName} 
+                  onChange={handleChange} 
+                  className="form-input" 
+                  placeholder="e.g. Google, Stripe, Microsoft" 
+                  required 
+                />
+              </div>
             </div>
             <div className="flex gap-4" style={{ flexWrap: 'wrap' }}>
               <div className="form-group" style={{ flex: 1, minWidth: '240px' }}>
@@ -219,6 +242,42 @@ export default function RecruiterDashboard() {
                   className="form-input" 
                   placeholder="e.g. ₹18 LPA - ₹24 LPA" 
                   required 
+                />
+              </div>
+            </div>
+            <div className="flex gap-4" style={{ flexWrap: 'wrap' }}>
+              <div className="form-group" style={{ flex: 2, minWidth: '240px' }}>
+                <label>Required Skills (comma-separated)</label>
+                <input 
+                  type="text" 
+                  name="requiredSkills" 
+                  value={formData.requiredSkills} 
+                  onChange={handleChange} 
+                  className="form-input" 
+                  placeholder="e.g. Java, Spring Boot, React, SQL, AWS" 
+                />
+              </div>
+              <div className="form-group" style={{ flex: 1, minWidth: '120px' }}>
+                <label>Min CGPA</label>
+                <input 
+                  type="number" 
+                  step="0.1" 
+                  name="minCgpa" 
+                  value={formData.minCgpa} 
+                  onChange={handleChange} 
+                  className="form-input" 
+                  placeholder="6.5" 
+                />
+              </div>
+              <div className="form-group" style={{ flex: 1, minWidth: '120px' }}>
+                <label>Graduation Year</label>
+                <input 
+                  type="number" 
+                  name="graduationYear" 
+                  value={formData.graduationYear} 
+                  onChange={handleChange} 
+                  className="form-input" 
+                  placeholder="2025" 
                 />
               </div>
             </div>
@@ -267,6 +326,16 @@ export default function RecruiterDashboard() {
                 </div>
               )}
 
+              {job.requiredSkills && (
+                <div className="flex gap-2 items-center" style={{ flexWrap: 'wrap', marginBottom: '12px' }}>
+                  {job.requiredSkills.split(',').map((skill, idx) => (
+                    <span key={idx} className="badge" style={{ fontSize: '0.75rem', background: 'white', padding: '2px 8px' }}>
+                      {skill.trim()}
+                    </span>
+                  ))}
+                </div>
+              )}
+
               <p style={{ 
                 margin: '0 0 16px 0', 
                 fontSize: '0.92rem', 
@@ -295,27 +364,14 @@ export default function RecruiterDashboard() {
         ))}
       </div>
 
-      {/* APPLICANTS MANAGEMENT MODAL */}
+      {/* APPLICANTS MANAGEMENT MODAL (TRUE CENTERED OVERLAY) */}
       {selectedJob && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.65)',
-          backdropFilter: 'blur(4px)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 1000,
-          padding: '20px'
-        }}>
-          <div className="glass-panel" style={{
+        <div className="modal-backdrop">
+          <div className="modal-content glass-panel" style={{
             background: 'var(--cream-bg)',
-            width: '100%',
+            width: '92%',
             maxWidth: '960px',
-            maxHeight: '90vh',
+            maxHeight: '88vh',
             display: 'flex',
             flexDirection: 'column',
             padding: '28px',
@@ -336,6 +392,7 @@ export default function RecruiterDashboard() {
                 <X size={24} />
               </button>
             </div>
+
 
             {/* Modal Body */}
             <div style={{ overflowY: 'auto', flex: 1, paddingRight: '4px' }}>

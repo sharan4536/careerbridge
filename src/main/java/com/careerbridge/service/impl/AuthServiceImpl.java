@@ -10,7 +10,6 @@ import com.careerbridge.repository.StudentRepository;
 import com.careerbridge.repository.UserRepository;
 import com.careerbridge.security.JwtTokenProvider;
 import com.careerbridge.service.AuthService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -19,10 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import lombok.RequiredArgsConstructor;
-
 @Service
-@RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
     private final AuthenticationManager authenticationManager;
@@ -30,6 +26,18 @@ public class AuthServiceImpl implements AuthService {
     private final StudentRepository studentRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider tokenProvider;
+
+    public AuthServiceImpl(AuthenticationManager authenticationManager,
+                           UserRepository userRepository,
+                           StudentRepository studentRepository,
+                           PasswordEncoder passwordEncoder,
+                           JwtTokenProvider tokenProvider) {
+        this.authenticationManager = authenticationManager;
+        this.userRepository = userRepository;
+        this.studentRepository = studentRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.tokenProvider = tokenProvider;
+    }
 
     @Override
     public JwtAuthenticationResponse login(LoginRequest loginRequest) {

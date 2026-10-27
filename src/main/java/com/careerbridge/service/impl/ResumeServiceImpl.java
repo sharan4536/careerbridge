@@ -12,19 +12,17 @@ import com.careerbridge.repository.StudentRepository;
 import com.careerbridge.repository.UserRepository;
 import com.careerbridge.service.FileStorageService;
 import com.careerbridge.service.ResumeService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.careerbridge.entity.Role;
-import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
+@Transactional
 public class ResumeServiceImpl implements ResumeService {
 
     private final ResumeRepository resumeRepository;
@@ -32,6 +30,18 @@ public class ResumeServiceImpl implements ResumeService {
     private final UserRepository userRepository;
     private final StudentRepository studentRepository;
     private final FileStorageService fileStorageService;
+
+    public ResumeServiceImpl(ResumeRepository resumeRepository,
+                             ResumeVersionRepository versionRepository,
+                             UserRepository userRepository,
+                             StudentRepository studentRepository,
+                             FileStorageService fileStorageService) {
+        this.resumeRepository = resumeRepository;
+        this.versionRepository = versionRepository;
+        this.userRepository = userRepository;
+        this.studentRepository = studentRepository;
+        this.fileStorageService = fileStorageService;
+    }
 
     private Student getStudentByEmail(String email) {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));

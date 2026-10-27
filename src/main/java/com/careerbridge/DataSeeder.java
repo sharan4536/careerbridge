@@ -22,7 +22,6 @@ import com.careerbridge.repository.SkillRepository;
 import com.careerbridge.repository.StudentRepository;
 import com.careerbridge.repository.StudentSkillRepository;
 import com.careerbridge.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -43,10 +42,7 @@ import java.util.List;
  * 4. Job eligibility criteria and skill requirements
  * 5. Initial student resumes, version history, and submitted applications with immutable snapshots
  */
-import lombok.RequiredArgsConstructor;
-
 @Component
-@RequiredArgsConstructor
 public class DataSeeder implements CommandLineRunner {
 
     private final CompanyRepository companyRepository;
@@ -59,10 +55,47 @@ public class DataSeeder implements CommandLineRunner {
     private final ResumeRepository resumeRepository;
     private final ResumeVersionRepository resumeVersionRepository;
     private final ApplicationRepository applicationRepository;
+    private final com.careerbridge.repository.ApplicationEventRepository applicationEventRepository;
     private final PasswordEncoder passwordEncoder;
+
+    public DataSeeder(CompanyRepository companyRepository,
+                      JobRepository jobRepository,
+                      JobRequirementRepository jobRequirementRepository,
+                      UserRepository userRepository,
+                      StudentRepository studentRepository,
+                      SkillRepository skillRepository,
+                      StudentSkillRepository studentSkillRepository,
+                      ResumeRepository resumeRepository,
+                      ResumeVersionRepository resumeVersionRepository,
+                      ApplicationRepository applicationRepository,
+                      com.careerbridge.repository.ApplicationEventRepository applicationEventRepository,
+                      PasswordEncoder passwordEncoder) {
+        this.companyRepository = companyRepository;
+        this.jobRepository = jobRepository;
+        this.jobRequirementRepository = jobRequirementRepository;
+        this.userRepository = userRepository;
+        this.studentRepository = studentRepository;
+        this.skillRepository = skillRepository;
+        this.studentSkillRepository = studentSkillRepository;
+        this.resumeRepository = resumeRepository;
+        this.resumeVersionRepository = resumeVersionRepository;
+        this.applicationRepository = applicationRepository;
+        this.applicationEventRepository = applicationEventRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Override
     public void run(String... args) throws Exception {
+        // Purge any legacy mock applications with demo hashes
+        for (Application a : applicationRepository.findAll()) {
+            if (a.getResumeSnapshot() != null && a.getResumeSnapshot().getContentHash() != null
+                    && a.getResumeSnapshot().getContentHash().startsWith("HASH-DEMO")) {
+                for (var event : applicationEventRepository.findByApplicationIdOrderByTimestampDesc(a.getId())) {
+                    applicationEventRepository.delete(event);
+                }
+                applicationRepository.delete(a);
+            }
+        }
         // 1. Seed Default Skills
         Skill javaSkill = getOrCreateSkill("Java");
         Skill reactSkill = getOrCreateSkill("React");
@@ -87,7 +120,7 @@ public class DataSeeder implements CommandLineRunner {
         if (student == null) {
             student = studentRepository.save(Student.builder()
                     .user(studentUser)
-                    .name("Alex Chen")
+                    .name("Student Candidate")
                     .college("Stanford University")
                     .degree("B.S. Computer Science")
                     .branch("Computer Science")
@@ -225,47 +258,7 @@ public class DataSeeder implements CommandLineRunner {
                     .experienceRequirement(1)
                     .build());
 
-            // 4. Seed an initial application for demo student if both exist
-            if (student != null && !versions.isEmpty()) {
-                ResumeVersion ver = versions.get(0);
-                        ApplicationResumeSnapshot snapshot = ApplicationResumeSnapshot.builder()
-                                .resumeName(resume.getName())
-                                .resumeVersion(ver.getVersionNumber())
-                                .resumeVersionId(ver.getId())
-                                .fileReference(ver.getFileReference())
-                                .contentHash("HASH-DEMO-001")
-                                .build();
-
-                        applicationRepository.save(Application.builder()
-                                .student(student)
-                                .job(job1)
-                                .resumeSnapshot(snapshot)
-                                .status("INTERVIEW_SCHEDULED")
-                                .eligibilityResult("ELIGIBLE")
-                                .jobFitScore(88.0)
-                                .notes("Passed preliminary screening.")
-                                .build());
-
-                        ApplicationResumeSnapshot snapshot2 = ApplicationResumeSnapshot.builder()
-                                .resumeName(resume.getName())
-                                .resumeVersion(ver.getVersionNumber())
-                                .resumeVersionId(ver.getId())
-                                .fileReference(ver.getFileReference())
-                                .contentHash("HASH-DEMO-002")
-                                .build();
-
-                        applicationRepository.save(Application.builder()
-                                .student(student)
-                                .job(job2)
-                                .resumeSnapshot(snapshot2)
-                                .status("UNDER_REVIEW")
-                                .eligibilityResult("ELIGIBLE")
-                                .jobFitScore(92.0)
-                                .notes("Applied via portal.")
-                                .build());
-            }
-
-            System.out.println("DataSeeder: Injected complete mock database state!");
+            System.out.println("DataSeeder: Initialized base system accounts, skills, and verified campus partners.");
         } else {
             // Ensure job requirements exist for existing jobs if they were created earlier
             List<Job> allJobs = jobRepository.findAll();
@@ -280,53 +273,6 @@ public class DataSeeder implements CommandLineRunner {
                             .requiredSkills("Java, React, SQL")
                             .experienceRequirement(0)
                             .build());
-                }
-            }
-
-            if (applicationRepository.count() == 0 && !allJobs.isEmpty()) {
-                User sUser = userRepository.findByEmail("student@careerbridge.com").orElse(null);
-                if (sUser != null) {
-                    Student s = studentRepository.findByUserId(sUser.getId()).orElse(null);
-                    List<Resume> resList = resumeRepository.findByStudentId(s.getId());
-                    if (!resList.isEmpty()) {
-                        List<ResumeVersion> vList = resumeVersionRepository.findByResumeIdOrderByVersionNumberDesc(resList.get(0).getId());
-                        if (!vList.isEmpty()) {
-                            ResumeVersion rv = vList.get(0);
-                            applicationRepository.save(Application.builder()
-                                    .student(s)
-                                    .job(allJobs.get(0))
-                                    .resumeSnapshot(ApplicationResumeSnapshot.builder()
-                                            .resumeName(resList.get(0).getName())
-                                            .resumeVersion(rv.getVersionNumber())
-                                            .resumeVersionId(rv.getId())
-                                            .fileReference(rv.getFileReference())
-                                            .contentHash("HASH-DEMO-001")
-                                            .build())
-                                    .status("INTERVIEW_SCHEDULED")
-                                    .eligibilityResult("ELIGIBLE")
-                                    .jobFitScore(88.0)
-                                    .notes("Shortlisted for tech round")
-                                    .build());
-
-                            if (allJobs.size() > 1) {
-                                applicationRepository.save(Application.builder()
-                                        .student(s)
-                                        .job(allJobs.get(1))
-                                        .resumeSnapshot(ApplicationResumeSnapshot.builder()
-                                                .resumeName(resList.get(0).getName())
-                                                .resumeVersion(rv.getVersionNumber())
-                                                .resumeVersionId(rv.getId())
-                                                .fileReference(rv.getFileReference())
-                                                .contentHash("HASH-DEMO-002")
-                                                .build())
-                                        .status("UNDER_REVIEW")
-                                        .eligibilityResult("ELIGIBLE")
-                                        .jobFitScore(92.0)
-                                        .notes("Application submitted")
-                                        .build());
-                            }
-                        }
-                    }
                 }
             }
         }

@@ -3,6 +3,9 @@ package com.careerbridge.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+/**
+ * Student entity representing academic background, grades, and profile attributes.
+ */
 @Entity
 @Table(name = "students")
 @Data

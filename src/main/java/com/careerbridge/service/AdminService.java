@@ -6,23 +6,29 @@ import com.careerbridge.entity.Role;
 import com.careerbridge.repository.ApplicationRepository;
 import com.careerbridge.repository.JobRepository;
 import com.careerbridge.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import lombok.RequiredArgsConstructor;
-
 @Service
-@RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class AdminService {
 
     private final UserRepository userRepository;
     private final JobRepository jobRepository;
     private final ApplicationRepository applicationRepository;
+
+    public AdminService(UserRepository userRepository,
+                        JobRepository jobRepository,
+                        ApplicationRepository applicationRepository) {
+        this.userRepository = userRepository;
+        this.jobRepository = jobRepository;
+        this.applicationRepository = applicationRepository;
+    }
 
     public AdminDashboardResponse getAdminDashboardStats() {
         AdminDashboardResponse resp = new AdminDashboardResponse();

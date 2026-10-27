@@ -9,12 +9,7 @@ import {
 
 const formatSalaryInr = (salary) => {
   if (!salary) return '';
-  return salary
-    .replace(/\$150k\s*-\s*\$200k/gi, '₹24 LPA - ₹32 LPA')
-    .replace(/\$120k\s*-\s*\$160k/gi, '₹16 LPA - ₹22 LPA')
-    .replace(/\$130k\s*-\s*\$180k/gi, '₹20 LPA - ₹28 LPA')
-    .replace(/\$110,000\s*-\s*\$130,000/gi, '₹14 LPA - ₹18 LPA')
-    .replace(/\$/g, '₹');
+  return salary;
 };
 
 export default function Jobs() {
@@ -124,6 +119,8 @@ export default function Jobs() {
     }
   };
 
+  const [useAsync, setUseAsync] = useState(true);
+
   const handleRunAutoApply = async () => {
     if (!autoApplyResumeId) {
       alert("Please select a default resume version.");
@@ -132,7 +129,8 @@ export default function Jobs() {
     setAutoApplyLoading(true);
     setAutoApplyResults(null);
     try {
-      const res = await api.post(`/auto-apply/run?defaultResumeVersionId=${autoApplyResumeId}`);
+      const endpoint = useAsync ? '/auto-apply/run-async' : '/auto-apply/run';
+      const res = await api.post(`${endpoint}?defaultResumeVersionId=${autoApplyResumeId}`);
       setAutoApplyResults(res.data);
     } catch (err) {
       alert('Auto-apply failed: ' + (err.response?.data?.message || err.message));
@@ -544,8 +542,29 @@ export default function Jobs() {
                 </div>
               </div>
 
+              {job.requiredSkills && (
+                <div className="flex gap-2 items-center" style={{ flexWrap: 'wrap', marginBottom: '12px' }}>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Required:</span>
+                  {job.requiredSkills.split(',').map((skill, idx) => (
+                    <span key={idx} className="badge" style={{ fontSize: '0.75rem', background: 'white', padding: '2px 8px' }}>
+                      {skill.trim()}
+                    </span>
+                  ))}
+                  {job.minCgpa && (
+                    <span className="badge badge-warning" style={{ fontSize: '0.75rem', padding: '2px 8px' }}>
+                      Min CGPA: {job.minCgpa}
+                    </span>
+                  )}
+                  {job.graduationYear && (
+                    <span className="badge badge-info" style={{ fontSize: '0.75rem', padding: '2px 8px' }}>
+                      Batch: {job.graduationYear}
+                    </span>
+                  )}
+                </div>
+              )}
+
               <p style={{ margin: '0 0 16px 0', color: '#475569', fontSize: '1rem', lineHeight: 1.5 }}>
-                {job.description}
+                {job.description || 'No job description provided.'}
               </p>
               
               {/* ACTION / TELEMETRY TOOLBAR */}
@@ -645,25 +664,12 @@ export default function Jobs() {
 
       {/* RECRUITER ONLY: Applicants Management Modal */}
       {isRecruiter && selectedJobForApplicants && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.65)',
-          backdropFilter: 'blur(4px)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 1000,
-          padding: '20px'
-        }}>
-          <div className="glass-panel" style={{
+        <div className="modal-backdrop">
+          <div className="modal-content glass-panel" style={{
             background: 'var(--cream-bg)',
-            width: '100%',
+            width: '92%',
             maxWidth: '960px',
-            maxHeight: '90vh',
+            maxHeight: '88vh',
             display: 'flex',
             flexDirection: 'column',
             padding: '28px',
@@ -823,13 +829,27 @@ export default function Jobs() {
               </select>
             </div>
 
+            <div className="form-group" style={{ marginBottom: '14px' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.85rem', color: '#1e293b' }}>
+                <input 
+                  type="checkbox" 
+                  checked={useAsync} 
+                  onChange={(e) => setUseAsync(e.target.checked)} 
+                />
+                <span><strong>Multithreaded Concurrent Execution (CompletableFuture)</strong></span>
+              </label>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginLeft: '24px', display: 'block' }}>
+                Executes eligibility verification on background worker threads managed by Spring's taskExecutor.
+              </span>
+            </div>
+
             <button 
               className="btn btn-primary w-full" 
               onClick={handleRunAutoApply} 
               disabled={autoApplyLoading || resumes.length === 0}
               style={{ fontSize: '1.1rem', padding: '12px' }}
             >
-              {autoApplyLoading ? 'Running Eligibility & Applying...' : '⚡ Run Auto-Apply Now'}
+              {autoApplyLoading ? 'Running Eligibility & Applying...' : (useAsync ? '⚡ Run Multithreaded Auto-Apply' : '⚡ Run Auto-Apply Now')}
             </button>
 
             {autoApplyResults && (

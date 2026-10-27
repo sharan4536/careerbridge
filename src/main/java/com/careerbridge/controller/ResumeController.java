@@ -3,7 +3,6 @@ package com.careerbridge.controller;
 import com.careerbridge.dto.response.ResumeResponse;
 import com.careerbridge.dto.response.ResumeVersionResponse;
 import com.careerbridge.service.ResumeService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -14,14 +13,15 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
-import lombok.RequiredArgsConstructor;
-
 @RestController
 @RequestMapping("/api/resumes")
-@RequiredArgsConstructor
 public class ResumeController {
 
     private final ResumeService resumeService;
+
+    public ResumeController(ResumeService resumeService) {
+        this.resumeService = resumeService;
+    }
 
     @PostMapping
     public ResponseEntity<ResumeResponse> createResume(Authentication authentication, @RequestParam String name) {

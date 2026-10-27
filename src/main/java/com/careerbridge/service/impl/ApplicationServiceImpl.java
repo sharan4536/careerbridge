@@ -9,17 +9,14 @@ import com.careerbridge.service.ApplicationService;
 import com.careerbridge.service.JobService;
 import com.careerbridge.service.engine.EligibilityEngine;
 import com.careerbridge.service.engine.JobFitEngine;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-import lombok.RequiredArgsConstructor;
-
 @Service
-@RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ApplicationServiceImpl implements ApplicationService {
 
     private final ApplicationRepository applicationRepository;
@@ -29,6 +26,22 @@ public class ApplicationServiceImpl implements ApplicationService {
     private final UserRepository userRepository;
     private final StudentRepository studentRepository;
     private final JobService jobService;
+
+    public ApplicationServiceImpl(ApplicationRepository applicationRepository,
+                                  ApplicationEventRepository applicationEventRepository,
+                                  JobRepository jobRepository,
+                                  ResumeVersionRepository resumeVersionRepository,
+                                  UserRepository userRepository,
+                                  StudentRepository studentRepository,
+                                  JobService jobService) {
+        this.applicationRepository = applicationRepository;
+        this.applicationEventRepository = applicationEventRepository;
+        this.jobRepository = jobRepository;
+        this.resumeVersionRepository = resumeVersionRepository;
+        this.userRepository = userRepository;
+        this.studentRepository = studentRepository;
+        this.jobService = jobService;
+    }
 
     private Student getStudentByEmail(String email) {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));

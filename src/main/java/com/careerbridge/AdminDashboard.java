@@ -24,17 +24,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
-/**
- * CareerBridge Desktop Admin Dashboard (JavaFX & JDBC).
- * 
- * An independent administrative desktop GUI tool demonstrating:
- * 1. JavaFX UI components (TableView, TableColumn, Buttons, Form Inputs, Layouts)
- * 2. Direct JDBC database operations:
- *    - java.sql.Connection via DriverManager
- *    - java.sql.Statement for query execution
- *    - java.sql.PreparedStatement for parameterized secure user insertions
- *    - Database checkpointing and SCRIPT TO backups
- */
+
 public class AdminDashboard extends Application {
 
     private static final String DB_URL = "jdbc:h2:file:./careerbridge_db;AUTO_SERVER=TRUE";
@@ -162,7 +152,7 @@ public class AdminDashboard extends Application {
     }
 
     private boolean insertUserViaJdbc(String email, String password, String role) {
-        String sql = "INSERT INTO users (email, password, role) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO users (email, password, role, created_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP)";
         try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, email);

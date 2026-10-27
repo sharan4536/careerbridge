@@ -8,14 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Eligibility Evaluation Rule Engine.
- * 
- * Performs deterministic validation to verify whether a student satisfies all mandatory
- * placement criteria set by hiring companies:
- * 1. Minimum Cumulative Grade Point Average (CGPA) threshold
- * 2. Maximum permissible active backlogs
- * 3. Eligible graduation passing out year
- * 4. Permitted engineering branches / disciplines
+ * Evaluates candidate eligibility based on academic benchmarks (CGPA, backlogs, branch, graduation year).
  */
 @Service
 public class EligibilityEngine {
@@ -29,13 +22,6 @@ public class EligibilityEngine {
         public List<String> reasons = new ArrayList<>();
     }
 
-    /**
-     * Evaluates a candidate against defined job criteria, generating audit reasons for each rule.
-     * 
-     * @param student Candidate academic profile
-     * @param req Company recruitment requirement criteria
-     * @return EligibilityResult containing status and itemized criteria reasons
-     */
     public EligibilityResult checkEligibility(Student student, JobRequirement req) {
         EligibilityResult result = new EligibilityResult();
         boolean eligible = true;

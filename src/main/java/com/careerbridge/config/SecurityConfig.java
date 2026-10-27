@@ -4,7 +4,6 @@ import com.careerbridge.security.CustomUserDetailsService;
 import com.careerbridge.security.JwtAuthenticationEntryPoint;
 import com.careerbridge.security.JwtAuthenticationFilter;
 import com.careerbridge.security.JwtTokenProvider;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -23,44 +22,44 @@ import org.springframework.web.cors.CorsConfiguration;
 
 import java.util.List;
 
+/**
+ * Security configuration for stateless JWT-based authentication and endpoint authorization.
+ */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-@RequiredArgsConstructor
 public class SecurityConfig {
 
     private final CustomUserDetailsService customUserDetailsService;
     private final JwtAuthenticationEntryPoint unauthorizedHandler;
     private final JwtTokenProvider tokenProvider;
 
+    public SecurityConfig(CustomUserDetailsService customUserDetailsService,
+                          JwtAuthenticationEntryPoint unauthorizedHandler,
+                          JwtTokenProvider tokenProvider) {
+        this.customUserDetailsService = customUserDetailsService;
+        this.unauthorizedHandler = unauthorizedHandler;
+        this.tokenProvider = tokenProvider;
+    }
+
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() {
         return new JwtAuthenticationFilter(tokenProvider, customUserDetailsService);
     }
 
-    /**
-     * Exposes the Spring AuthenticationManager bean used during user login.
-     */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
     }
 
-    /**
-     * Password encoder using BCrypt hashing algorithm for secure credential storage.
-     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    /**
-     * Main security filter chain establishing HTTP endpoint access rules and filters.
-     */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            // Configure CORS to allow communication with frontend development and production servers
             .cors(cors -> cors.configurationSource(request -> {
                 CorsConfiguration corsConfiguration = new CorsConfiguration();
                 corsConfiguration.setAllowedOriginPatterns(List.of("*"));
@@ -69,14 +68,11 @@ public class SecurityConfig {
                 corsConfiguration.setAllowCredentials(true);
                 return corsConfiguration;
             }))
-            // Disable CSRF as REST APIs rely on stateless JWT Bearer tokens
             .csrf(AbstractHttpConfigurer::disable)
-            // Handle unauthorized access attempts with custom 401 response
             .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
-            // Enforce stateless session management (no server-side HTTP session storage)
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            // Define URL access rules
             .authorizeHttpRequests(auth -> auth
+                .dispatcherTypeMatchers(jakarta.servlet.DispatcherType.ASYNC, jakarta.servlet.DispatcherType.FORWARD, jakarta.servlet.DispatcherType.ERROR).permitAll()
                 .requestMatchers(
                     "/",
                     "/index.html",
@@ -90,16 +86,21 @@ public class SecurityConfig {
                     "/recruiter",
                     "/assets/**",
                     "/favicon.ico",
+                    "/favicon.svg",
+                    "/icons.svg",
+                    "/*.svg",
+                    "/*.ico",
+                    "/*.png",
                     "/error",
                     "/h2-console/**"
                 ).permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/jobs").permitAll()
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .anyRequest().authenticated()
             )
-            .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()));
+            .headers(headers -> headers.frameOptions(frame -> frame.disable()));
 
-        // Register custom JWT filter in the Spring Security filter chain
         http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

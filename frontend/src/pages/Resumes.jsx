@@ -9,7 +9,7 @@ export default function Resumes() {
   // AI Cover Letter Studio Modal
   const [showAIModal, setShowAIModal] = useState(false);
   const [jobDescription, setJobDescription] = useState('');
-  const [targetRole, setTargetRole] = useState('Full-Stack Software Engineer');
+  const [targetRole, setTargetRole] = useState('');
   const [coverLetterOutput, setCoverLetterOutput] = useState('');
   const [aiGenerating, setAiGenerating] = useState(false);
   const [copied, setCopied] = useState(false);

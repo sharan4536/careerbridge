@@ -34,3 +34,14 @@ build/
 
 ### VS Code ###
 .vscode/
+/.apt_generated_tests/
+
+### OS / Misc / Temporary Runtime Files ###
+.DS_Store
+cookies.txt
+package-lock.json
+uploads/student_*
+!uploads/student_1_a2bd51e0-583b-4223-a224-a91acdc68656.pdf
+!uploads/sample_resume.pdf
+backups/*_view.sql
+backups/*_demo*.sql

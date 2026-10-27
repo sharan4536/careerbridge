@@ -4,7 +4,6 @@ import lombok.Builder;
 import lombok.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
@@ -29,18 +28,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * JDBC Database Persistence and Administration Service.
- * 
- * Provides direct JDBC operations via {@link JdbcTemplate} and {@link DataSource}:
- * 1. Synchronous database disk checkpoints (CHECKPOINT SYNC)
- * 2. Complete SQL database dumps using JDBC SCRIPT TO
- * 3. Schema inspection and table metadata analysis via {@link DatabaseMetaData}
- * 4. Raw table data exports
+ * Low-level database management service utilizing JDBC for metadata diagnostics,
+ * synchronous checkpointing, and raw SQL backups.
  */
-import lombok.RequiredArgsConstructor;
-
 @Service
-@RequiredArgsConstructor
 public class JdbcDatabasePersistenceService {
 
     private static final Logger log = LoggerFactory.getLogger(JdbcDatabasePersistenceService.class);
@@ -48,6 +39,11 @@ public class JdbcDatabasePersistenceService {
 
     private final JdbcTemplate jdbcTemplate;
     private final DataSource dataSource;
+
+    public JdbcDatabasePersistenceService(JdbcTemplate jdbcTemplate, DataSource dataSource) {
+        this.jdbcTemplate = jdbcTemplate;
+        this.dataSource = dataSource;
+    }
 
     @Data
     @Builder
@@ -80,9 +76,6 @@ public class JdbcDatabasePersistenceService {
         }
     }
 
-    /**
-     * Executes JDBC CHECKPOINT SYNC to flush all in-memory changes directly to disk.
-     */
     public Map<String, Object> flushCheckpointToDisk() {
         log.info("Executing JDBC CHECKPOINT SYNC...");
         jdbcTemplate.execute("CHECKPOINT SYNC");
@@ -93,9 +86,6 @@ public class JdbcDatabasePersistenceService {
         return res;
     }
 
-    /**
-     * Saves a complete SQL script dump of the database using JDBC SCRIPT TO command.
-     */
     public BackupFileDto saveDatabaseBackup(String optionalNote) {
         ensureBackupDirectory();
         flushCheckpointToDisk();
@@ -108,7 +98,6 @@ public class JdbcDatabasePersistenceService {
         Path backupPath = Paths.get(BACKUP_DIR, fileName).toAbsolutePath();
 
         log.info("Generating JDBC SCRIPT backup to: {}", backupPath);
-        // H2 supports SCRIPT TO 'filepath'
         jdbcTemplate.execute("SCRIPT TO '" + backupPath.toString().replace("\\", "/") + "'");
 
         File savedFile = backupPath.toFile();
@@ -123,9 +112,6 @@ public class JdbcDatabasePersistenceService {
                 .build();
     }
 
-    /**
-     * Lists all saved SQL database backups.
-     */
     public List<BackupFileDto> listBackups() {
         ensureBackupDirectory();
         File dir = new File(BACKUP_DIR);
@@ -147,9 +133,6 @@ public class JdbcDatabasePersistenceService {
         return list;
     }
 
-    /**
-     * Reads a backup file content if needed for download or verification.
-     */
     public byte[] getBackupContent(String fileName) throws Exception {
         Path filePath = Paths.get(BACKUP_DIR, fileName).normalize();
         if (!filePath.startsWith(Paths.get(BACKUP_DIR).normalize())) {
@@ -158,17 +141,11 @@ public class JdbcDatabasePersistenceService {
         return Files.readAllBytes(filePath);
     }
 
-    /**
-     * Exports a specific table using JDBC JdbcTemplate query.
-     */
     public List<Map<String, Object>> exportTableData(String tableName) {
         String sanitized = tableName.replaceAll("[^a-zA-Z0-9_]", "").toUpperCase();
         return jdbcTemplate.queryForList("SELECT * FROM " + sanitized);
     }
 
-    /**
-     * Retrieves JDBC Metadata and table row counts.
-     */
     public DatabaseStatusDto getDatabaseStatus() {
         try (Connection conn = dataSource.getConnection()) {
             DatabaseMetaData meta = conn.getMetaData();

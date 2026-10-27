@@ -1,6 +1,8 @@
 package com.careerbridge.service.impl;
 
+import com.careerbridge.dto.request.JobRequest;
 import com.careerbridge.dto.response.JobResponse;
+import com.careerbridge.entity.Company;
 import com.careerbridge.entity.Job;
 import com.careerbridge.entity.JobRequirement;
 import com.careerbridge.entity.Student;
@@ -16,7 +18,6 @@ import com.careerbridge.service.JobService;
 import com.careerbridge.service.engine.EligibilityEngine;
 import com.careerbridge.service.engine.JobFitEngine;
 import com.careerbridge.service.engine.SkillGapAnalyzer;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,7 +25,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class JobServiceImpl implements JobService {
 
     private final JobRepository jobRepository;
@@ -36,6 +37,26 @@ public class JobServiceImpl implements JobService {
     private final EligibilityEngine eligibilityEngine;
     private final JobFitEngine jobFitEngine;
     private final SkillGapAnalyzer skillGapAnalyzer;
+
+    public JobServiceImpl(JobRepository jobRepository,
+                          JobRequirementRepository jobRequirementRepository,
+                          UserRepository userRepository,
+                          StudentRepository studentRepository,
+                          StudentSkillRepository studentSkillRepository,
+                          CompanyRepository companyRepository,
+                          EligibilityEngine eligibilityEngine,
+                          JobFitEngine jobFitEngine,
+                          SkillGapAnalyzer skillGapAnalyzer) {
+        this.jobRepository = jobRepository;
+        this.jobRequirementRepository = jobRequirementRepository;
+        this.userRepository = userRepository;
+        this.studentRepository = studentRepository;
+        this.studentSkillRepository = studentSkillRepository;
+        this.companyRepository = companyRepository;
+        this.eligibilityEngine = eligibilityEngine;
+        this.jobFitEngine = jobFitEngine;
+        this.skillGapAnalyzer = skillGapAnalyzer;
+    }
 
     private Student getStudentByEmail(String email) {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
@@ -50,22 +71,53 @@ public class JobServiceImpl implements JobService {
         return jobRepository.findAll().stream().map(job -> {
             JobResponse resp = new JobResponse();
             resp.setId(job.getId());
-            resp.setCompanyName(job.getCompany().getName());
+            resp.setCompanyName(job.getCompany() != null ? job.getCompany().getName() : "Enterprise Partner");
             resp.setRole(job.getRole());
             resp.setLocation(job.getLocation());
             resp.setSalaryRange(job.getSalaryRange());
+            resp.setDescription(job.getDescription());
             resp.setPostedDate(job.getPostedDate());
+
+            jobRequirementRepository.findByJobId(job.getId()).ifPresent(req -> {
+                resp.setRequiredSkills(req.getRequiredSkills());
+                resp.setPreferredSkills(req.getPreferredSkills());
+                resp.setMinCgpa(req.getMinCgpa());
+                resp.setMaxBacklogs(req.getMaxBacklogs());
+                resp.setGraduationYear(req.getGraduationYear());
+                resp.setEligibleBranches(req.getEligibleBranches());
+            });
+
             return resp;
         }).collect(Collectors.toList());
     }
 
     @Override
     @Transactional
-    public JobResponse createJob(String email, com.careerbridge.dto.request.JobRequest request) {
-        // Mocking company for MVP based on recruiter email domain or just a default
-        com.careerbridge.entity.Company company = companyRepository.findByName("Tech Corp");
-        if(company == null) {
-            company = com.careerbridge.entity.Company.builder().name("Tech Corp").website("techcorp.com").build();
+    public JobResponse createJob(String email, JobRequest request) {
+        String companyName = request.getCompanyName();
+        if (companyName == null || companyName.trim().isEmpty()) {
+            if (email != null && email.contains("@")) {
+                String domain = email.substring(email.indexOf("@") + 1);
+                int dot = domain.indexOf(".");
+                String candidate = dot > 0 ? domain.substring(0, dot) : domain;
+                if (!candidate.equalsIgnoreCase("campus") && !candidate.equalsIgnoreCase("student") && !candidate.equalsIgnoreCase("recruiter")) {
+                    companyName = candidate.substring(0, 1).toUpperCase() + candidate.substring(1);
+                } else {
+                    companyName = "CareerBridge Partner";
+                }
+            } else {
+                companyName = "CareerBridge Partner";
+            }
+        }
+        companyName = companyName.trim();
+
+        Company company = companyRepository.findByName(companyName);
+        if (company == null) {
+            String domainSlug = companyName.toLowerCase().replaceAll("[^a-z0-9]", "");
+            company = Company.builder()
+                    .name(companyName)
+                    .website("www." + (domainSlug.isEmpty() ? "careerbridge" : domainSlug) + ".com")
+                    .build();
             company = companyRepository.save(company);
         }
 
@@ -79,15 +131,23 @@ public class JobServiceImpl implements JobService {
                 .build();
         
         job = jobRepository.save(job);
+
+        Double minCgpa = request.getMinCgpa();
+        Integer maxBacklogs = request.getMaxBacklogs();
+        Integer graduationYear = request.getGraduationYear();
+        String eligibleBranches = request.getEligibleBranches();
+        String requiredSkills = request.getRequiredSkills();
+        String preferredSkills = request.getPreferredSkills();
+
         
-        jobRequirementRepository.save(JobRequirement.builder()
+        JobRequirement requirement = jobRequirementRepository.save(JobRequirement.builder()
                 .job(job)
-                .minCgpa(6.5)
-                .maxBacklogs(2)
-                .graduationYear(2025)
-                .eligibleBranches("Computer Science, Information Technology, Electronics, ECE, Data Science")
-                .requiredSkills("Java, Spring Boot, React, SQL")
-                .preferredSkills("Docker, AWS, Git")
+                .minCgpa(minCgpa)
+                .maxBacklogs(maxBacklogs)
+                .graduationYear(graduationYear)
+                .eligibleBranches(eligibleBranches)
+                .requiredSkills(requiredSkills)
+                .preferredSkills(preferredSkills)
                 .build());
         
         JobResponse resp = new JobResponse();
@@ -96,9 +156,17 @@ public class JobServiceImpl implements JobService {
         resp.setRole(job.getRole());
         resp.setLocation(job.getLocation());
         resp.setSalaryRange(job.getSalaryRange());
+        resp.setDescription(job.getDescription());
         resp.setPostedDate(job.getPostedDate());
+        resp.setRequiredSkills(requirement.getRequiredSkills());
+        resp.setPreferredSkills(requirement.getPreferredSkills());
+        resp.setMinCgpa(requirement.getMinCgpa());
+        resp.setMaxBacklogs(requirement.getMaxBacklogs());
+        resp.setGraduationYear(requirement.getGraduationYear());
+        resp.setEligibleBranches(requirement.getEligibleBranches());
         return resp;
     }
+
 
     @Override
     public EligibilityEngine.EligibilityResult checkEligibility(String email, Long jobId) {

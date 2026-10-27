@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../api';
-import { Users, Briefcase, FileText, Activity, RefreshCw, ShieldCheck, Database, Award, CheckCircle, Clock, Save, HardDrive, Download, AlertCircle } from 'lucide-react';
+import { Users, Briefcase, FileText, Activity, RefreshCw, ShieldCheck, Database, Award, CheckCircle, Clock, Save, HardDrive, Download, AlertCircle, ExternalLink } from 'lucide-react';
 import { Navigate } from 'react-router-dom';
 
 export default function AdminDashboard() {
@@ -195,6 +195,16 @@ export default function AdminDashboard() {
             <h3 style={{ margin: 0, color: '#0f172a' }}>Database Persistence & JDBC Management</h3>
           </div>
           <div className="flex items-center gap-3">
+            <a 
+              href="/h2-console" 
+              target="_blank" 
+              rel="noreferrer" 
+              className="btn btn-outline flex items-center gap-2" 
+              style={{ padding: '8px 14px', fontSize: '0.88rem', borderColor: '#6366f1', color: '#4f46e5' }}
+            >
+              <ExternalLink size={16} />
+              Open H2 Console
+            </a>
             <button 
               className="btn btn-outline flex items-center gap-2" 
               onClick={handleCheckpointSync}

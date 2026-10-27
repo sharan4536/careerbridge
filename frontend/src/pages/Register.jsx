@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api';
 import { Pencil } from 'lucide-react';
 
 export default function Register() {
@@ -40,7 +40,7 @@ export default function Register() {
     };
 
     try {
-      await axios.post('http://localhost:8080/api/auth/register', payload);
+      await api.post('/auth/register', payload);
       setSuccess('Account created successfully! Redirecting to login...');
       setTimeout(() => navigate('/login'), 1500);
     } catch (err) {

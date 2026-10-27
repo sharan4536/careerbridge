@@ -2,6 +2,9 @@ package com.careerbridge.dto.response;
 
 import lombok.Data;
 
+/**
+ * Data transfer object representing a student's public and academic profile.
+ */
 @Data
 public class StudentProfileDto {
     private String name;

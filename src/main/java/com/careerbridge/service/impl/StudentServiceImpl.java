@@ -7,17 +7,23 @@ import com.careerbridge.entity.User;
 import com.careerbridge.repository.StudentRepository;
 import com.careerbridge.repository.UserRepository;
 import com.careerbridge.service.StudentService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import lombok.RequiredArgsConstructor;
-
+/**
+ * Implementation of StudentService managing student data persistence and profile synchronization.
+ */
 @Service
-@RequiredArgsConstructor
+@Transactional
 public class StudentServiceImpl implements StudentService {
 
     private final UserRepository userRepository;
     private final StudentRepository studentRepository;
+
+    public StudentServiceImpl(UserRepository userRepository, StudentRepository studentRepository) {
+        this.userRepository = userRepository;
+        this.studentRepository = studentRepository;
+    }
 
     @Override
     public StudentProfileDto getProfile(String email) {
@@ -36,6 +42,9 @@ public class StudentServiceImpl implements StudentService {
             studentRepository.save(Student.builder().user(user).name(user.getEmail().split("@")[0]).build())
         );
 
+        if (updateRequest.getName() != null && !updateRequest.getName().isBlank()) {
+            student.setName(updateRequest.getName());
+        }
         student.setPhone(updateRequest.getPhone());
         student.setDegree(updateRequest.getDegree());
         student.setBranch(updateRequest.getBranch());
